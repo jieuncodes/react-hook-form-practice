@@ -14,36 +14,15 @@ export default function IndexPage() {
     formState: { errors },
     watch,
   } = useForm<FormData>();
-  const [emailWarning, setEmailWarning] = useState(false);
-  const [passwordWarning, setPasswordWarning] = useState(false);
+
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   const onSubmit = (data: FormData) => {
     setFormSubmitted(true);
   };
-  const email = watch("email");
-  const emailPattern = /^\S+@naver\.com$/i;
-
-  if (email && !emailPattern.test(email) && !emailWarning) {
-    setEmailWarning(true);
-  } else if (email && emailPattern.test(email) && emailWarning) {
-    setEmailWarning(false);
-  }
-  const password = watch("password");
-  const passwordMinLength = 10;
-  if (password && password.length < passwordMinLength && !passwordWarning) {
-    setPasswordWarning(true);
-  } else if (
-    password &&
-    password.length >= passwordMinLength &&
-    passwordWarning
-  ) {
-    setPasswordWarning(false);
-  }
 
   return (
     <>
-      {" "}
       <form onSubmit={handleSubmit(onSubmit)}>
         <div>
           <label htmlFor="name">Name:</label>
@@ -52,7 +31,7 @@ export default function IndexPage() {
             type="text"
             {...register("name", { required: "Please write down your name." })}
           />
-          {errors.name && <p>{errors.name.message}</p>}
+          {errors?.name?.message}
         </div>
         <div>
           <label htmlFor="email">Email:</label>
@@ -62,14 +41,15 @@ export default function IndexPage() {
             placeholder="Only @naver.com"
             {...register("email", {
               required: "Please write down your Email",
-              pattern: {
-                value: emailPattern,
-                message: "only @naver email allowed",
+              validate: {
+                naver: (text) => text.includes("@naver.com"),
               },
             })}
           />
-          {emailWarning && <p>Please use a @naver.com email address</p>}
-          {errors.email && <p>{errors.email.message}</p>}
+          {errors?.email?.message}
+          {errors?.email?.type === "naver"
+            ? "Only @naver emails allowed"
+            : null}
         </div>
         <div>
           <label htmlFor="password">Password:</label>
@@ -85,8 +65,7 @@ export default function IndexPage() {
               },
             })}
           />
-          {passwordWarning && <p>Passsword has to be more than 10 chars</p>}
-          {errors.password && <p>{errors.password.message}</p>}
+          {errors?.password?.message}
         </div>
         <button type="submit">Log in</button>
       </form>
